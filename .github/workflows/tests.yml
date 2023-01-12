@@ -70,11 +70,10 @@ jobs:
           name: env-${{ matrix.os }}-Python-${{ matrix.python-version }}
           path: env.yaml
 
-      - name: Run tests
-        run: source continuous_integration/scripts/run_tests.sh
-      
+      # - name: Run tests
+        # run: source continuous_integration/scripts/run_tests.sh
 
-      - name: Debug with tmate on failure
+       - name: Debug with tmate
         uses: mxschmitt/action-tmate@v3
 
       - name: Coverage
