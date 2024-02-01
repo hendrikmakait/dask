@@ -1568,7 +1568,7 @@ Dask Name: {name}, {layers}"""
             out.append(out_df)
         return out
 
-    def head(self, n=5, npartitions=1, compute=True):
+    def head(self, n=5, npartitions=1, compute=no_default):
         """First n rows of the dataset
 
         Parameters
@@ -1582,9 +1582,25 @@ Dask Name: {name}, {layers}"""
             returned. Pass -1 to use all partitions.
         compute : bool, optional
             Whether to compute the result, default is True.
+
+            .. warning::
+                The default value of ``True`` has been deprecated and will
+                be changed to ``False`` in the future.
         """
         if npartitions <= -1:
             npartitions = self.npartitions
+
+        if compute is no_default:
+            warnings.warn(
+                "The default value of `True` for the `compute` keyword argument is "
+                "deprecated and will be changed to `False` in a future version. "
+                "Please set `compute` to the desired value to avoid seeing this "
+                "warning",
+                FutureWarning,
+                stacklevel=2,
+            )
+            compute = True
+
         # No need to warn if we're already looking at all partitions
         safe = npartitions != self.npartitions
         return self._head(n=n, npartitions=npartitions, compute=compute, safe=safe)
@@ -4813,11 +4829,26 @@ class Index(Series):
     def __array_wrap__(self, array, context=None):
         return pd.Index(array, name=self.name)
 
-    def head(self, n=5, compute=True):
+    def head(self, n=5, compute=no_default):
         """First n items of the Index.
 
         Caveat, this only checks the first partition.
+
+        .. warning::
+            The default value of ``True`` for the ``compute`` keyword argument
+            has been deprecated and will be changed to ``False`` in the future.
         """
+        if compute is no_default:
+            warnings.warn(
+                "The default value of `True` for the `compute` keyword argument is "
+                "deprecated and will be changed to `False` in a future version. "
+                "Please set `compute` to the desired value to avoid seeing this "
+                "warning",
+                FutureWarning,
+                stacklevel=2,
+            )
+            compute = True
+
         name = "head-%d-%s" % (n, self._name)
         dsk = {(name, 0): (operator.getitem, (self._name, 0), slice(0, n))}
         graph = HighLevelGraph.from_collections(name, dsk, dependencies=[self])
